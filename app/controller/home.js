@@ -1,8 +1,6 @@
-'use strict'
-
 const { Controller } = require('egg')
 
-class HomeController extends Controller {
+module.exports = class extends Controller {
 	async get_main_banner() {
 		const { ctx } = this
 		const result = await ctx.service.home.get_main_banner()
@@ -21,5 +19,3 @@ class HomeController extends Controller {
 		ctx.body = result
 	}
 }
-
-module.exports = HomeController

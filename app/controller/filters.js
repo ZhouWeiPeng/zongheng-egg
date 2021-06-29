@@ -1,8 +1,6 @@
-'use strict'
-
 const { Controller } = require('egg')
 
-class FiltersController extends Controller {
+module.exports = class extends Controller {
 	async get_male_filters() {
 		const { ctx } = this
 		const result = await ctx.service.filters.get_single_filters(0)
@@ -27,5 +25,3 @@ class FiltersController extends Controller {
 		ctx.body = result
 	}
 }
-
-module.exports = FiltersController

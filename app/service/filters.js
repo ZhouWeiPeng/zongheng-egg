@@ -1,9 +1,7 @@
-'use strict'
-
 const { Service } = require('egg')
 const cheerio = require('cheerio')
 
-class FiltersService extends Service {
+module.exports = class extends Service {
 	#server_url = `http://book.zongheng.com/store`
 
 	#gender_map = new Map([
@@ -27,10 +25,7 @@ class FiltersService extends Service {
 	 */
 	async get_single_filters(type = 0) {
 		const url = `${this.#server_url}/c0/c0/b${type}/u0/p1/v9/s9/t0/u0/i1/ALL`
-		const res = await this.ctx.curl(url, {
-			dataType: 'text'
-		})
-		const $ = cheerio.load(res.data)
+		const $ = await this.ctx.service.cheerio.fetch(url)
 		const key_map = this.#key_map
 		return $('div.select_con div.kind div.bz').map(function () {
 			const el = $(this)
@@ -66,10 +61,7 @@ class FiltersService extends Service {
 	 * @returns {Promise<Array>}
 	 */
 	async get_sort_modes() {
-		const res = await this.ctx.curl(this.#server_url, {
-			dataType: 'text'
-		})
-		const $ = cheerio.load(res.data)
+		const $ = await this.ctx.service.cheerio.fetch(this.#server_url)
 		return $('div.sort div.kind div.nr div.sort_form').map(function () {
 			const is_multiple = $(this).hasClass('dropdown')
 			const el = $('a.store', this)
@@ -89,5 +81,3 @@ class FiltersService extends Service {
 		}).get()
 	}
 }
-
-module.exports = FiltersService

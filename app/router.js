@@ -1,8 +1,3 @@
-'use strict'
-
-/**
- * @param {Egg.Application} app - egg application
- */
 module.exports = app => {
 	const { router, controller } = app
 	// 获取男频书籍筛选条件
@@ -23,4 +18,6 @@ module.exports = app => {
 
 	// 获取人气榜单（榜单概览）
 	router.get('/rank/get_overview_list', controller.rank.get_overview_list)
+	// 获取所有榜单信息
+	router.get('/rank/get_all_ranks', controller.rank.get_all_ranks)
 }

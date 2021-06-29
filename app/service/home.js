@@ -1,9 +1,7 @@
-'use strict'
-
 const { Service } = require('egg')
 const cheerio = require('cheerio')
 
-class HomeService extends Service {
+module.exports = class extends Service {
 	#server_url = 'http://book.zongheng.com/'
 
 	/**
@@ -11,17 +9,14 @@ class HomeService extends Service {
 	 * @returns {Promise<Array>}
 	 */
 	async get_main_banner() {
-		const res = await this.ctx.curl(this.#server_url, {
-			dataType: 'text'
-		})
-		const $ = cheerio.load(res.data)
+		const $ = await this.ctx.service.cheerio.fetch(this.#server_url)
 		return $('#index_tpic li a').map(function () {
 			const el = $(this)
 			const img_el = $('img', this)
 			const { src, alt } = img_el.attr()
 			return {
 				img_url: src,
-				img_name: alt,
+				book_name: alt,
 				href: el.attr('href'),
 				book_id: el.data('sa-d').book_id,
 				scrtxt: img_el.next().text()
@@ -34,10 +29,7 @@ class HomeService extends Service {
 	 * @returns {Promise<Array>}
 	 */
 	async get_try_read_books() {
-		const res = await this.ctx.curl(this.#server_url, {
-			dataType: 'text'
-		})
-		const $ = cheerio.load(res.data)
+		const $ = await this.ctx.service.cheerio.fetch(this.#server_url)
 		return $('.mind-showbook .mind-book').map(function () {
 			const a_el = $('a', this)
 			const { src, alt } = $('.img-book img', this).attr()
@@ -45,7 +37,7 @@ class HomeService extends Service {
 			const cate_el = $('.cate', this)
 			return {
 				img_url: src,
-				img_name: alt,
+				book_name: alt,
 				book_href: a_el.attr('href'),
 				book_id: a_el.data('sa-d').book_id,
 				book_desc: $('.book-info .info', this).text(),
@@ -62,10 +54,7 @@ class HomeService extends Service {
 	 * @returns {Promise<Array>}
 	 */
 	async get_classic_end_books() {
-		const res = await this.ctx.curl(this.#server_url, {
-			dataType: 'text'
-		})
-		const $ = cheerio.load(res.data)
+		const $ = await this.ctx.service.cheerio.fetch(this.#server_url)
 		const img_el = $('.overbook .swiper-item img')
 		const info_el = $('.overbook .itemInfo')
 		return info_el.map(function (i) {
@@ -86,5 +75,3 @@ class HomeService extends Service {
 		}).get()
 	}
 }
-
-module.exports = HomeService

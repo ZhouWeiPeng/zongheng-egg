@@ -1,15 +1,12 @@
-'use strict'
-
 const { Service } = require('egg')
 const cheerio = require('cheerio')
 
-class CommonService extends Service {
-  async get_cheerio_obj(url) {
+module.exports = class extends Service {
+  // 获取cheerio对象
+  async fetch(url, { isSetCache, isGetCache } = {}) {
     const res = await this.ctx.curl(url, {
 			dataType: 'text'
 		})
 		return cheerio.load(res.data)
   }
 }
-
-module.exports = CommonService
