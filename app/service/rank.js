@@ -4,6 +4,8 @@ const qs = require('querystring')
 module.exports = class extends Service {
 	#server_url = 'http://book.zongheng.com/rank.html'
 
+	#detail_url = 'http://book.zongheng.com/rank/details.html'
+
 	/**
 	 * 获取人气榜单（榜单概览）
 	 * @returns {Promise<Array>}
@@ -56,5 +58,38 @@ module.exports = class extends Service {
 				querystring
 			}
 		}).get()
+	}
+
+	/**
+	 * 获取作品榜单详情
+	 * @returns {Promise<Array>}
+	 */
+	async get_works_rank_detail(query) {
+		const $ = await this.ctx.service.cheerio.fetch(`${this.#detail_url}?${qs.stringify(query)}`)
+		const { page, count, total } = $('.pagebar')?.attr() || {}
+		return {
+			page,
+			count,
+			total,
+			title: $('.rank_i_title_name').text().replace(/\s/g, ''),
+			list: $('.rank_d_list').map(function () {
+				const { bookname, bookid } = $(this).attr()
+				const a_els = $('.rank_d_b_cate a', this)
+				const last_el = $('.rank_d_b_last', this)
+				return {
+					img_url: $('.rank_d_book_img img', this).attr('src'),
+					book_name: bookname,
+					book_id: bookid,
+					author_name: $(a_els[0]).text(),
+					author_id: $(a_els[0]).attr('href').match(/\d+(?=\.html$)/)?.[0],
+					cate_name: $(a_els[1]).text(),
+					is_end: $(a_els[2]).text() === '完结',
+					book_desc: $('.rank_d_b_info', this).text(),
+					last_chapter_name: last_el.attr('title'),
+					last_chapter_id: last_el.children('a').attr('href').match(/\d+(?=\.html$)/)?.[0],
+					update_time: last_el.children('.rank_d_b_time').text()
+				}
+			}).get()
+		}
 	}
 }

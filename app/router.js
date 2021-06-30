@@ -20,4 +20,6 @@ module.exports = app => {
 	router.get('/rank/get_overview_list', controller.rank.get_overview_list)
 	// 获取所有榜单信息
 	router.get('/rank/get_all_ranks', controller.rank.get_all_ranks)
+	// 获取作品榜单详情
+	router.get('/rank/get_works_rank_detail', controller.rank.get_works_rank_detail)
 }

@@ -12,4 +12,10 @@ module.exports = class extends Controller {
 		const result = await ctx.service.rank.get_all_ranks()
 		ctx.body = result
 	}
+
+	async get_works_rank_detail() {
+		const { ctx } = this
+		const result = await ctx.service.rank.get_works_rank_detail(ctx.query)
+		ctx.body = result
+	}
 }
