@@ -1,5 +1,4 @@
 const { Service } = require('egg')
-const cheerio = require('cheerio')
 
 module.exports = class extends Service {
 	#server_url = 'http://book.zongheng.com/'

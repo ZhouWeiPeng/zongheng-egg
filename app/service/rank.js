@@ -67,12 +67,13 @@ module.exports = class extends Service {
 	async get_works_rank_detail(query) {
 		const $ = await this.ctx.service.cheerio.fetch(`${this.#detail_url}?${qs.stringify(query)}`)
 		const { page, count, total } = $('.pagebar')?.attr() || {}
+		const is_overflow = query.p > (count || 1)
 		return {
 			page,
 			count,
 			total,
 			title: $('.rank_i_title_name').text().replace(/\s/g, ''),
-			list: $('.rank_d_list').map(function () {
+			list: is_overflow ? [] : $('.rank_d_list').map(function () {
 				const { bookname, bookid } = $(this).attr()
 				const a_els = $('.rank_d_b_cate a', this)
 				const last_el = $('.rank_d_b_last', this)
@@ -91,5 +92,103 @@ module.exports = class extends Service {
 				}
 			}).get()
 		}
+	}
+
+	/**
+	 * 获取读者消费榜详情
+	 * @returns {Promise<Array>}
+	 */
+	async get_reader_rank_detail() {
+		const $ = await this.ctx.service.cheerio.fetch(`${this.#detail_url}?rt=11`)
+		return {
+			title: $('.c_sub_header').text(),
+			list: $('.c_rank_list tbody tr').map(function () {
+				const td_el = $('td', this)
+				const user_el = td_el.eq(1)
+				const user_id = $('a', user_el).attr('href').match(/\d+(?=\.html$)/)?.[0]
+				const { src, alt } = $('img', user_el).attr()
+				const int_el = td_el.eq(2).children('.JuserLevel')
+				return {
+					user_id,
+					user_avatar: src,
+					user_name: alt,
+					int_level: int_el.data('level'),
+					int_alias: int_el.next().text().replace(/[\uff08\uff09]/g, ''),
+					vip_level: td_el.eq(3).children('em').attr('class'),
+					total_point: td_el.eq(4).text(),
+					praise_works: $('a', td_el.eq(5)).map(function () {
+						const { href, title } = $(this).attr()
+						return {
+							book_id: href.match(/\d+(?=\.html$)/)?.[0],
+							book_name: title
+						}
+					}).get()
+				}
+			}).get()
+		}
+	}
+
+	/**
+	 * 获取作者人气榜详情
+	 * @returns {Promise<Array>}
+	 */
+	async get_writer_rank_detail() {
+		const $ = await this.ctx.service.cheerio.fetch(`${this.#detail_url}?rt=12`)
+		return {
+			title: $('.c_sub_header').text(),
+			list: $('.c_rank_list tbody tr').map(function () {
+				const td_el = $('td', this)
+				const user_el = td_el.eq(1)
+				const book_el = td_el.eq(3).children('a')
+				return {
+					user_id: $('a', user_el).attr('href').match(/\d+(?=\.html$)/)?.[0],
+					user_avatar: $('img', user_el).attr('src'),
+					user_name: user_el.attr('title'),
+					popular_num: td_el.eq(2).text(),
+					latest_works: {
+						book_name: book_el.text(),
+						book_id: book_el.attr('href').match(/\d+(?=\.html$)/)?.[0]
+					}
+				}
+			}).get()
+		}
+	}
+
+	/**
+	 * 获取新书榜的时间筛选项
+	 * @returns {Promise<Array>}
+	 */
+	async get_newbook_time_options() {
+		const $ = await this.ctx.service.cheerio.fetch(`${this.#detail_url}?rt=4&d=1`)
+		return $('.select_item li').map(function () {
+			const el = $(this)
+			return {
+				label: el.text(),
+				value: el.data('val')
+			}
+		}).get()
+	}
+
+	/**
+	 * 获取分类和时期的筛选项
+	 * @returns {Promise<Array>}
+	 */
+	async get_cate_period_options() {
+		const $ = await this.ctx.service.cheerio.fetch(`${this.#detail_url}?rt=5&d=1`)
+		const periods = $('.rank_clicknum a').map(function () {
+			const el = $(this)
+			return {
+				label: el.text(),
+				value: el.attr('period')
+			}
+		}).get()
+		const cates = $('.rankclass_nav a').map(function () {
+			const el = $(this)
+			return {
+				label: el.text(),
+				value: el.attr('catepid')
+			}
+		}).get()
+		return { periods, cates }
 	}
 }
