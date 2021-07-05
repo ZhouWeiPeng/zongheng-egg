@@ -98,7 +98,7 @@ module.exports = class extends Service {
 			['style_type', 'i', '1'], // 排版样式
 			['first_char', '', 'ALL'] // 首字母
 		]
-		const queryStr = key_map.reduce((total, [key, prefix, defVal]) => total + `/${prefix}${query[key] || defVal}`, '')
+		const queryStr = key_map.reduce((total, [key, prefix, defVal]) => `${total}/${prefix}${query[key] || defVal}`, '')
 		const url = this.#server_url + queryStr
 		const $ = await this.ctx.service.cheerio.fetch(url)
 		const { page, count, total } = $('.pagebar')?.attr() || {}
