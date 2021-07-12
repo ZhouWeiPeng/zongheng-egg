@@ -1,7 +1,10 @@
 const { Service } = require('egg')
+const qs = require('querystring')
 
 module.exports = class extends Service {
 	#server_url = `http://book.zongheng.com/store`
+
+	#search_url = 'http://search.zongheng.com/s'
 
 	#gender_map = new Map([
 		[0, '男生频道'],
@@ -130,5 +133,47 @@ module.exports = class extends Service {
 				}
 			}).get()
 		}
+	}
+
+	/**
+	 * 搜索关键词
+	 * @returns {Promise<Array>}
+	 */
+	async search_books(query) {
+		const url = `${this.#search_url}?${qs.stringify(query)}`
+		const $ = await this.ctx.service.cheerio.fetch(url)
+		const result = {}
+		const page_el = $('.search_d_pagesize')
+		if (!page_el) {
+			result.page = 1
+			result.count = 1
+		} else {
+			result.page = page_el.children('.active').text()
+			result.count = page_el.children('#totalPage').text()
+		}
+		const is_overflow = query.pageNo > result.count
+		result.list = is_overflow ? [] : $('.search-result-list').map(function () {
+			const infos_el = $('.se-result-infos', this)
+			const book_el = $('.tit a', infos_el)
+			const info_el = $('.bookinfo', infos_el)
+			const a_el = info_el.children('a')
+			const span_el = info_el.children('span')
+			const author_el = a_el.eq(0)
+			const cate_el = a_el.eq(1)
+			return {
+				img_url: $('.imgbox img', this).attr('src'),
+				book_id: book_el.attr('href').match(/\d+(?=\.html$)/)?.[0],
+				book_name: book_el.text(),
+				author_name: author_el.text(),
+				author_id: author_el.attr('href').match(/\d+(?=\.html$)/)?.[0],
+				cate_name: cate_el.text(),
+				cate_id: cate_el.attr('href').match(/\d+(?=\.html$)/)?.[0],
+				is_end: span_el.eq(0).text().includes('完结'),
+				total_word: span_el.eq(1).text().replace('字', ''),
+				book_desc: info_el.next().text(),
+				keywords: infos_el.children('.key-word').text().replace('关键词：', '').trim().split(/\s/)
+			}
+		}).get()
+		return result
 	}
 }

@@ -30,4 +30,10 @@ module.exports = class extends Controller {
 		const result = await ctx.service.store.get_book_list(ctx.query)
 		ctx.body = result
 	}
+
+	async search_books() {
+		const { ctx } = this
+		const result = await ctx.service.store.search_books(ctx.query)
+		ctx.body = result
+	}
 }

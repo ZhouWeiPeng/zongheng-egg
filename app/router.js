@@ -10,6 +10,8 @@ module.exports = app => {
 	router.get('/store/get_sort_options', controller.store.get_sort_options)
 	// 获取书本列表
 	router.get('/store/get_book_list', controller.store.get_book_list)
+	// 搜索关键词
+	router.get('/store/search_books', controller.store.search_books)
 
 	// 获取首页大轮播图
 	router.get('/home/get_main_banner', controller.home.get_main_banner)
@@ -32,4 +34,7 @@ module.exports = app => {
 	router.get('/rank/get_newbook_time_options', controller.rank.get_newbook_time_options)
 	// 获取分类和时期的筛选项
 	router.get('/rank/get_cate_period_options', controller.rank.get_cate_period_options)
+
+	// 获取书籍的章节列表
+	router.get('/book/get_chapter_list', controller.book.get_chapter_list)
 }
