@@ -37,4 +37,6 @@ module.exports = app => {
 
 	// 获取书籍的章节列表
 	router.get('/book/get_chapter_list', controller.book.get_chapter_list)
+	// 获取章节内容
+	router.get('/book/get_chapter_content', controller.book.get_chapter_content)
 }

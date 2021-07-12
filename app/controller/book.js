@@ -6,4 +6,10 @@ module.exports = class extends Controller {
 		const result = await ctx.service.book.get_chapter_list(ctx.query)
 		ctx.body = result
 	}
+
+	async get_chapter_content() {
+		const { ctx } = this
+		const result = await ctx.service.book.get_chapter_content(ctx.query)
+		ctx.body = result
+	}
 }
